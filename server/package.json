@@ -1,0 +1,32 @@
+{
+  "name": "localfix-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LocalFix Express backend server",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.3",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.24.4",
+    "morgan": "^1.12.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^10.0.12",
+    "razorpay": "^2.9.5",
+    "socket.io": "^4.8.4",
+    "twilio": "^6.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
