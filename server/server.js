@@ -76,6 +76,32 @@ app.use('/api', reviewRoutes);
 app.use('/api', chatRoutes);
 app.use('/api/otp', otpRoutes);
 
+// ---------- SERVE CLIENT STATIC FILES & FALLBACK ----------
+const clientDistPath = path.join(__dirname, '../client/dist');
+app.use(express.static(clientDistPath));
+
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) return next();
+  const fs = require('fs');
+  const indexHtml = path.join(clientDistPath, 'index.html');
+  if (fs.existsSync(indexHtml)) {
+    return res.sendFile(indexHtml);
+  }
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head><title>LocalFix API Server</title></head>
+      <body style="background:#060e1a;color:#f1f5f9;font-family:sans-serif;text-align:center;padding:60px;">
+        <h1 style="color:#3b82f6;">🚀 LocalFix API Server is Running on Port 3000</h1>
+        <p style="color:#cbd5e1;">Express backend API & Socket.IO server are active.</p>
+        <div style="margin-top:30px;background:#0c1b33;display:inline-block;padding:20px 40px;border-radius:16px;border:1px solid #3b82f640;">
+          <p style="font-size:16px;margin:0;">👉 Open <strong><a href="http://localhost:5173" style="color:#60a5fa;text-decoration:none;font-weight:bold;">http://localhost:5173</a></strong> for the React Frontend Application</p>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
 // ---------- ERROR HANDLER ----------
 app.use((err, req, res, next) => {
   const status = err.status || 500;

@@ -1,122 +1,146 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Wrench, Coins, LogOut, User as UserIcon, ShieldCheck, PhoneCall, LayoutDashboard } from 'lucide-react';
+import { Wrench, User, LogOut, Coins, ShieldCheck, LayoutDashboard, PlusCircle, History, AlertCircle, Wallet } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  // Extract first name dynamically
+  const getFirstName = () => {
+    if (!user) return '';
+    if (user.firstName) return user.firstName;
+    if (user.name) return user.name.split(' ')[0];
+    return 'User';
+  };
+
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-navy-800/90 backdrop-blur-md border-b border-signal-500/20 px-4 lg:px-8 py-3.5">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-navy-950/80 backdrop-blur-md border-b border-slate-800">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         
-        {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-signal-600 to-blue-400 flex items-center justify-center shadow-lg shadow-signal-500/30 group-hover:scale-105 transition-transform">
-            <Wrench className="w-5 h-5 text-white" />
+        {/* Brand Identity Logo */}
+        <Link 
+          to={
+            !user ? '/' : 
+            user.role === 'customer' ? '/customer-dashboard' : 
+            user.role === 'technician' ? '/technician-dashboard' : 
+            '/admin-dashboard'
+          } 
+          className="flex items-center gap-2"
+        >
+          <div className="w-9 h-9 rounded-xl bg-signal-600 flex items-center justify-center text-white shadow-lg shadow-signal-600/30">
+            <Wrench className="w-5 h-5" />
           </div>
-          <div>
-            <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-signal-500 bg-clip-text text-transparent">
-              Local<span className="text-signal-500">Fix</span>
-            </span>
-            <span className="block text-[10px] font-medium text-slate-400 tracking-wider uppercase">On-Demand Repair</span>
-          </div>
+          <span className="text-lg font-black tracking-tight text-white">
+            Local<span className="text-signal-400">Fix</span>
+          </span>
         </Link>
 
-        {/* Center / Navigation Links */}
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
-          <Link to="/" className="hover:text-signal-500 transition-colors">Home</Link>
-          
-          {user?.role === 'customer' && (
+        {/* Dynamic Navigation Links based on Login Status */}
+        <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300">
+          {!user ? (
             <>
-              <Link to="/customer-dashboard" className="hover:text-signal-500 transition-colors">Dashboard</Link>
-              <Link to="/booking" className="hover:text-signal-500 transition-colors">Book Repair</Link>
-              <Link to="/repair-history" className="hover:text-signal-500 transition-colors">History & Proof</Link>
-              <Link to="/complaint" className="hover:text-signal-500 transition-colors">File Complaint</Link>
+              <Link to="/" className="hover:text-signal-400 transition-colors">Home</Link>
+              <a href="#how-it-works" className="hover:text-signal-400 transition-colors">How it Works</a>
+              <a href="#appliances" className="hover:text-signal-400 transition-colors">Appliance Categories</a>
+              <a href="#guarantee" className="hover:text-signal-400 transition-colors">90-Day Guarantee</a>
             </>
-          )}
-
-          {user?.role === 'technician' && (
+          ) : user.role === 'customer' ? (
             <>
-              <Link to="/technician-dashboard" className="hover:text-signal-500 transition-colors">Job Feed</Link>
-              <Link to="/earnings" className="hover:text-signal-500 transition-colors">Earnings & Wallet</Link>
+              <Link to="/customer-dashboard" className="hover:text-signal-400 flex items-center gap-1">
+                <LayoutDashboard className="w-3.5 h-3.5" /> Dashboard
+              </Link>
+              <Link to="/booking" className="hover:text-signal-400 flex items-center gap-1">
+                <PlusCircle className="w-3.5 h-3.5" /> Book AI Repair
+              </Link>
+              <Link to="/repair-history" className="hover:text-signal-400 flex items-center gap-1">
+                <History className="w-3.5 h-3.5" /> Repair History & Warranty
+              </Link>
+              <Link to="/complaint" className="hover:text-signal-400 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5" /> File Complaint
+              </Link>
             </>
-          )}
-
-          {user?.role === 'admin' && (
+          ) : user.role === 'technician' ? (
             <>
-              <Link to="/admin-dashboard" className="hover:text-signal-500 transition-colors">Admin Command Center</Link>
+              <Link to="/technician-dashboard" className="hover:text-signal-400 flex items-center gap-1">
+                <LayoutDashboard className="w-3.5 h-3.5" /> Technician Portal
+              </Link>
+              <Link to="/earnings" className="hover:text-signal-400 flex items-center gap-1">
+                <Wallet className="w-3.5 h-3.5" /> Wallet & Earnings
+              </Link>
             </>
-          )}
-
-          {!user && (
+          ) : (
             <>
-              <Link to="/apply-technician" className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-semibold">
-                <ShieldCheck className="w-4 h-4" /> Become a Partner Tech
+              <Link to="/admin-dashboard" className="hover:text-signal-400 flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5" /> Admin Command Center
               </Link>
             </>
           )}
-        </div>
+        </nav>
 
-        {/* Right Action Section */}
-        <div className="flex items-center gap-3">
+        {/* User Right Section */}
+        <div className="flex items-center gap-4">
           
-          {/* Google Translate Widget Container */}
-          <div id="google_translate_element" className="scale-90"></div>
+          {/* Google Translate Container */}
+          <div id="google_translate_element" className="scale-90 opacity-90 hidden sm:block"></div>
 
           {user ? (
             <div className="flex items-center gap-3">
-              {/* LocalFix Coins Badge (For Customers) */}
+              
+              {/* LocalFix Coins Badge for Customers */}
               {user.role === 'customer' && (
-                <div className="hidden sm:flex items-center gap-1.5 bg-navy-900/80 border border-amber-500/30 px-3 py-1.5 rounded-full text-xs font-bold text-amber-400 shadow-inner">
-                  <Coins className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                  <span>{user.coins || 50} Coins</span>
+                <div className="hidden sm:flex items-center gap-1 bg-amber-950/60 border border-amber-500/40 text-amber-400 px-3 py-1 rounded-full text-xs font-bold">
+                  <Coins className="w-3.5 h-3.5 fill-amber-400" />
+                  <span>{user.coins || 100} Coins</span>
                 </div>
               )}
 
-              {/* User Avatar & Logout */}
-              <div className="flex items-center gap-2 bg-navy-700/60 border border-slate-700/60 px-3 py-1.5 rounded-xl">
-                <div className="w-7 h-7 rounded-lg bg-signal-600/30 text-signal-400 flex items-center justify-center font-bold text-xs uppercase border border-signal-500/30">
-                  {user.name ? user.name.charAt(0) : 'U'}
+              {/* User Name Greeting & Profile Pill */}
+              <div className="flex items-center gap-2 bg-navy-900 border border-slate-700/80 px-3 py-1.5 rounded-full">
+                <div className="w-6 h-6 rounded-full bg-signal-600/30 text-signal-400 flex items-center justify-center font-bold text-xs uppercase">
+                  {getFirstName().charAt(0)}
                 </div>
-                <div className="text-left hidden sm:block">
-                  <p className="text-xs font-semibold text-slate-200 leading-none">{user.name}</p>
-                  <p className="text-[10px] text-signal-400 font-medium capitalize mt-0.5">{user.role}</p>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  title="Log Out"
-                  className="ml-2 text-slate-400 hover:text-rose-400 transition-colors p-1"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
+                <span className="text-xs font-bold text-white">
+                  Hi, {getFirstName()}
+                </span>
               </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                title="Sign Out"
+                className="p-2 text-slate-400 hover:text-rose-400 hover:bg-navy-900 rounded-full transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Link
                 to="/login"
-                className="px-4 py-2 text-xs font-semibold text-slate-200 hover:text-white transition-colors"
+                className="text-xs font-semibold text-slate-300 hover:text-white px-3 py-1.5 transition-colors"
               >
-                Log In
+                Sign In
               </Link>
               <Link
                 to="/register"
-                className="px-4 py-2 text-xs font-semibold text-white bg-signal-600 hover:bg-signal-500 rounded-xl shadow-lg shadow-signal-500/25 transition-all transform active:scale-95"
+                className="bg-signal-600 hover:bg-signal-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg shadow-signal-600/25 transition-all"
               >
-                Get Started
+                Register
               </Link>
             </div>
           )}
 
         </div>
+
       </div>
-    </nav>
+    </header>
   );
 }
