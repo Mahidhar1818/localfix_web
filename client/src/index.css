@@ -4,26 +4,25 @@
 
 @layer base {
   body {
-    background-color: #060e1a;
-    color: #f1f5f9;
+    background-color: #f4f7ff;
+    color: #0f172a;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
 
 .glass-card {
-  background: rgba(12, 27, 51, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px 0 rgba(37, 99, 235, 0.06);
 }
 
 .glass-card-hover {
-  transition: all 0.3s ease;
+  transition: all 0.2s ease-in-out;
 }
 
 .glass-card-hover:hover {
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow: 0 12px 40px 0 rgba(59, 130, 246, 0.2);
+  border-color: #2563eb;
+  box-shadow: 0 8px 24px 0 rgba(37, 99, 235, 0.12);
   transform: translateY(-2px);
 }
 

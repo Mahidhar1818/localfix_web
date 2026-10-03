@@ -38,22 +38,32 @@ function authPayload(user) {
 router.post('/register', authRateLimiter, async (req, res, next) => {
   try {
     const { name, email, password, phone, role = 'customer', skills = [], address, location } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email, and password are required' });
+    
+    // Mobile phone and password are mandatory
+    if (!name || !phone || !password) {
+      return res.status(400).json({ error: 'Name, mobile phone number, and password are required' });
     }
     if (password.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters long' });
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
-    if (await User.exists({ email: normalizedEmail })) {
-      return res.status(409).json({ error: 'An account with this email address already exists' });
+    const trimmedPhone = phone.trim();
+    if (await User.exists({ phone: trimmedPhone })) {
+      return res.status(409).json({ error: 'An account with this mobile phone number already exists' });
+    }
+
+    let normalizedEmail = undefined;
+    if (email && email.trim()) {
+      normalizedEmail = email.trim().toLowerCase();
+      if (await User.exists({ email: normalizedEmail })) {
+        return res.status(409).json({ error: 'An account with this email address already exists' });
+      }
     }
 
     const user = await User.create({
       name: name.trim(),
       email: normalizedEmail,
-      phone: phone?.trim(),
+      phone: trimmedPhone,
       password: await bcrypt.hash(password, 12),
       role: role === 'technician' ? 'technician' : 'customer',
       skills: Array.isArray(skills) ? skills.slice(0, 20) : [],
@@ -69,24 +79,31 @@ router.post('/register', authRateLimiter, async (req, res, next) => {
   }
 });
 
-// ---------- LOGIN (CUSTOMER / ADMIN / TECHNICIAN ID) ----------
+// ---------- LOGIN (CUSTOMER / ADMIN / TECHNICIAN ID / PHONE) ----------
 router.post('/login', authRateLimiter, async (req, res, next) => {
   try {
-    const { email, password, technicianId } = req.body;
-    if (!password || (!email && !technicianId)) {
-      return res.status(400).json({ error: 'Please provide Email / Technician ID and Password' });
+    const { email, phone, identifier, password, technicianId } = req.body;
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' });
+    }
+
+    const loginId = (identifier || email || phone || technicianId || '').trim();
+    if (!loginId) {
+      return res.status(400).json({ error: 'Please provide Email, Phone Number, or Technician ID' });
     }
 
     let query = {};
-    if (technicianId && technicianId.trim()) {
-      query = { technicianId: technicianId.trim().toUpperCase() };
+    if (loginId.toUpperCase().startsWith('LF-TECH-')) {
+      query = { technicianId: loginId.toUpperCase() };
+    } else if (loginId.includes('@')) {
+      query = { email: loginId.toLowerCase() };
     } else {
-      query = { email: email.trim().toLowerCase() };
+      query = { phone: loginId };
     }
 
     const user = await User.findOne(query).select('+password');
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials. Please check your details.' });
+      return res.status(401).json({ error: 'Invalid credentials. Account not found.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);

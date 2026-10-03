@@ -42,18 +42,21 @@ export default function Register() {
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!firstName || !lastName || !email || !password) {
-      setToast({ type: 'error', message: 'Please fill in all required fields.' });
+    if (!firstName || !lastName || !phone || !password) {
+      setToast({ type: 'error', message: 'Please fill in First Name, Last Name, Mobile Phone Number, and Password.' });
       return;
     }
     setLoading(true);
     try {
-      await API.post('/otp/send-email-otp', { email });
+      const res = await API.post('/otp/send-smart', { phone, email });
       setOtpSent(true);
       setShowOtpModal(true);
-      setToast({ type: 'success', message: `Verification OTP sent to ${email}` });
+      if (res.data.channel === 'email') {
+        setToast({ type: 'success', message: `Verification OTP sent to email (${res.data.target})` });
+      } else {
+        setToast({ type: 'success', message: `Verification OTP sent to mobile phone (${res.data.target})` });
+      }
     } catch (err) {
-      // Fallback if backend mailer unconfigured
       setShowOtpModal(true);
       setToast({ type: 'info', message: 'OTP 123456 generated for testing.' });
     } finally {
@@ -69,8 +72,8 @@ export default function Register() {
         name: fullName,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        email,
-        phone,
+        email: email ? email.trim() : undefined,
+        phone: phone.trim(),
         password,
         address,
         pincode,
@@ -161,49 +164,47 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Email Address *</label>
+              <label className="block text-slate-300 font-semibold mb-1">Mobile Phone Number *</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                 <input
-                  type="email"
+                  type="tel"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="john.doe@example.com"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+91 9876543210"
                   className="w-full bg-navy-900 border border-slate-700 text-slate-100 rounded-xl pl-9 pr-3 py-2.5 focus:border-signal-500 focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Phone Number</label>
-                <div className="relative">
-                  <Phone className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+91 9876543210"
-                    className="w-full bg-navy-900 border border-slate-700 text-slate-100 rounded-xl pl-9 pr-3 py-2.5 focus:border-signal-500 focus:outline-none"
-                  />
-                </div>
+            <div>
+              <label className="block text-slate-300 font-semibold mb-1">Email Address <span className="text-slate-400 font-normal text-xs">(Optional)</span></label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="customer@example.com (optional)"
+                  className="w-full bg-navy-900 border border-slate-700 text-slate-100 rounded-xl pl-9 pr-3 py-2.5 focus:border-signal-500 focus:outline-none"
+                />
               </div>
+            </div>
 
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Create Password *</label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
-                  <input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-navy-900 border border-slate-700 text-slate-100 rounded-xl pl-9 pr-3 py-2.5 focus:border-signal-500 focus:outline-none"
-                  />
-                </div>
+            <div>
+              <label className="block text-slate-300 font-semibold mb-1">Create Password *</label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-navy-900 border border-slate-700 text-slate-100 rounded-xl pl-9 pr-3 py-2.5 focus:border-signal-500 focus:outline-none"
+                />
               </div>
             </div>
 

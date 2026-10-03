@@ -55,4 +55,24 @@ router.post('/email/verify', async (req, res, next) => {
   }
 });
 
+router.post('/send-smart', otpRateLimiter, async (req, res, next) => {
+  try {
+    const { phone, email, purpose = 'verify' } = req.body;
+    
+    if (email && email.trim()) {
+      const result = await sendEmailOtp(email.trim(), purpose);
+      return res.json({ ok: true, channel: 'email', target: email.trim(), identifier: result.identifier, dev: Boolean(result.dev), code: result.code });
+    }
+
+    if (!phone || !phone.trim()) {
+      return res.status(400).json({ error: 'Mobile phone number is required when email is not provided' });
+    }
+
+    const result = await sendSmsOtp(phone.trim(), purpose);
+    res.json({ ok: true, channel: 'sms', target: phone.trim(), identifier: result.identifier, dev: Boolean(result.dev), code: result.code });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
